@@ -78,6 +78,12 @@ namespace FluentWPFSample
             win.ShowDialog();
         }
 
+        private void OpenBaseAltColors(object sender, RoutedEventArgs e)
+        {
+            var win = new Views.BaseAltColorsSample();
+            win.ShowDialog();
+        }
+
         private void OpenLogo(object sender, RoutedEventArgs e)
         {
             var win = new Views.Logo();
@@ -101,5 +107,7 @@ namespace FluentWPFSample
             var win = new Views.DropShadowPanelSample2();
             win.ShowDialog();
         }
+
+       
     }
 }

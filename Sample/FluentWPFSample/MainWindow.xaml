@@ -37,6 +37,7 @@
             <GroupBox Header="AccentColors">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="AccentColors" Click="OpenAccentColors" />
+                    <Button Content="BaseAltColors" Click="OpenBaseAltColors" />
                 </StackPanel>
             </GroupBox>
             <GroupBox Header="Other">
