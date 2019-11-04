@@ -8,6 +8,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+
 namespace SourceChord.FluentWPF
 {
     public class CommandBar : UserControl
@@ -15,7 +17,6 @@ namespace SourceChord.FluentWPF
         //Dependency Properties
         public static readonly DependencyPropertyKey PrimaryCommandsProperty = DependencyProperty.RegisterReadOnly("PrimaryCommands", typeof(UIElementCollection), typeof(CommandBar), new PropertyMetadata());
         public static readonly DependencyPropertyKey MainContentProperty = DependencyProperty.RegisterReadOnly("MainContent", typeof(UIElementCollection), typeof(CommandBar), new PropertyMetadata());
-        public static readonly DependencyPropertyKey IconProperty = DependencyProperty.RegisterReadOnly("Icon", typeof(UIElementCollection), typeof(CommandBar), new PropertyMetadata());
         public static readonly DependencyProperty CommandBarOrientationProperty = DependencyProperty.Register("CommandBarOrientation", typeof(Orientation), typeof(CommandBar), new UIPropertyMetadata(Orientation.Vertical, OnCommandBarOrientationPropertyChanged));
         public static readonly DependencyProperty SecondaryCommandsProperty = DependencyProperty.Register("SecondaryCommands", typeof(ContextMenu), typeof(CommandBar), new PropertyMetadata());
         static Color cmd_color = (Color)Application.Current.Resources["SystemControlAcrylicWindowFallbackColor"];
@@ -29,7 +30,13 @@ namespace SourceChord.FluentWPF
         ColumnDefinition Column_More;
         public Button button_more;
         StackPanel StackPanel_PrimaryCommands;
-        bool isExpanded = false;
+        private bool isExpanded = false;
+
+
+
+
+
+
         private static void OnCommandBarOrientationPropertyChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             CommandBar commandBar = (CommandBar)source;
@@ -44,7 +51,12 @@ namespace SourceChord.FluentWPF
                 //change the border size
                 commandBar.button_more.BorderThickness = new Thickness(0, 0, 0, 0);
             }
+
+            commandBar.change_orientation();
+
+            //RaisePropertyChanged("CommandBarOrientation");
         }
+
         public Orientation CommandBarOrientation
         {
             get
@@ -58,6 +70,10 @@ namespace SourceChord.FluentWPF
                 //RaisePropertyChanged("CommandBarOrientation");
             }
         }
+
+
+
+
         public UIElementCollection PrimaryCommands
         {
             get
@@ -80,17 +96,7 @@ namespace SourceChord.FluentWPF
                 SetValue(MainContentProperty, value);
             }
         }
-        public UIElementCollection Icon
-        {
-            get
-            {
-                return (UIElementCollection)GetValue(IconProperty.DependencyProperty);
-            }
-            set
-            {
-                SetValue(IconProperty, value);
-            }
-        }
+
         public ContextMenu SecondaryCommands
         {
             get
@@ -115,60 +121,156 @@ namespace SourceChord.FluentWPF
         }
         public CommandBar()
         {
-            Height = 48;
-            MainGrid = new Grid();
-            AddChild(MainGrid);
-            Content_Grid = new Grid();
-            IconHolder_More = new Grid();
-            IconHolder_More.Width = 20;
-            IconHolder_More.Height = 20;
-            //settings of the CommandBar
-            MainGrid.Background = CommandBarColor;
-            SystemTheme.ThemeChanged += new EventHandler((object obj, EventArgs args) =>
+            Loaded += CommandBar_Loaded;
+            if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
             {
-                cmd_color = (Color)Application.Current.Resources["SystemControlAcrylicWindowFallbackColor"];
-                CommandBarColor = new SolidColorBrush(cmd_color);
+                Height = 48;
+                MainGrid = new Grid();
+                AddChild(MainGrid);
+                Content_Grid = new Grid();
+                IconHolder_More = new Grid();
+                IconHolder_More.Width = 20;
+                IconHolder_More.Height = 20;
+                //settings of the CommandBar
+                // MainGrid.Background = CommandBarColor;
+                SystemTheme.ThemeChanged += new EventHandler((object obj, EventArgs args) =>
+                {
+                    cmd_color = Color.FromRgb(230, 230, 230);
+                    CommandBarColor = new SolidColorBrush(cmd_color);
+                    MainGrid.Background = CommandBarColor;
+                });
+
+
+
+                MainGrid.Background = Brushes.LightGray;
+
+
+                //create three columns
+                Column_Content = new ColumnDefinition();
+                Column_Content.Width = new System.Windows.GridLength(100, System.Windows.GridUnitType.Star);
+                Column_PrimaryCommands = new ColumnDefinition();
+                Column_PrimaryCommands.Width = System.Windows.GridLength.Auto;
+                Column_More = new ColumnDefinition();
+                Column_More.Width = System.Windows.GridLength.Auto;
+                MainGrid.ColumnDefinitions.Add(Column_Content);
+                MainGrid.ColumnDefinitions.Add(Column_PrimaryCommands);
+                MainGrid.ColumnDefinitions.Add(Column_More);
+                //add experimental objects
+                Style button_style = Application.Current.FindResource("ButtonRevealStyle") as Style;
+                button_more = new Button();
+                button_more.Background = Brushes.Transparent;
+                button_more.Width = 48;
+                //button_more.Style = button_style;
+                button_more.Click += Button_more_Click;
+                button_more.Content = IconHolder_More;
+                button_more.BorderThickness = new Thickness(1, 1, 1, 1);
+                button_more.ToolTip = "See more";
+                Grid.SetColumn(button_more, 2);
+                //SetColumn(button_more, 2);
+                Grid.SetRow(button_more, 0);
+                MainGrid.Children.Add(button_more);
+                //add experimental objects
+                StackPanel_PrimaryCommands = new StackPanel();
+                StackPanel_PrimaryCommands.Orientation = Orientation.Horizontal;
+                //StackPanel_PrimaryCommands.Width = 100;
+                Grid.SetColumn(StackPanel_PrimaryCommands, 1);
+                Grid.SetRow(StackPanel_PrimaryCommands, 0);
+                MainGrid.Children.Add(StackPanel_PrimaryCommands);
+                Grid.SetColumn(Content_Grid, 0);
+                Grid.SetRow(Content_Grid, 0);
+                MainGrid.Children.Add(Content_Grid);
+                PrimaryCommands = StackPanel_PrimaryCommands.Children;
+                MainContent = Content_Grid.Children;
+
+                //change_orientation();
+
+
+                //ImageBrush img_icon = new ImageBrush();
+                //img_icon.ImageSource = ImageToBitmapImage(Properties.Resources.ellipsis_h);
+                //Border border_icon = new Border();
+                //border_icon.Width = 22;
+                //border_icon.Height = 22;
+                //border_icon.Background = img_icon;
+                //button_more.Content = border_icon;
+                button_more.Background = Brushes.DarkGray;
+            }
+            else
+            {
+                Height = 48;
+                MainGrid = new Grid();
+                AddChild(MainGrid);
+                Content_Grid = new Grid();
+                IconHolder_More = new Grid();
+                IconHolder_More.Width = 20;
+                IconHolder_More.Height = 20;
+                //settings of the CommandBar
                 MainGrid.Background = CommandBarColor;
-            });
-            //create three columns
-            Column_Content = new ColumnDefinition();
-            Column_Content.Width = new System.Windows.GridLength(100, System.Windows.GridUnitType.Star);
-            Column_PrimaryCommands = new ColumnDefinition();
-            Column_PrimaryCommands.Width = System.Windows.GridLength.Auto;
-            Column_More = new ColumnDefinition();
-            Column_More.Width = System.Windows.GridLength.Auto;
-            MainGrid.ColumnDefinitions.Add(Column_Content);
-            MainGrid.ColumnDefinitions.Add(Column_PrimaryCommands);
-            MainGrid.ColumnDefinitions.Add(Column_More);
-            //add experimental objects
-            Style button_style = Application.Current.FindResource("ButtonRevealStyle") as Style;
-            button_more = new Button();
-            button_more.Background = Brushes.Transparent;
-            button_more.Width = 48;
-            button_more.Style = button_style;
-            button_more.Click += Button_more_Click;
-            button_more.Content = IconHolder_More;
-            button_more.BorderThickness = new Thickness(1, 1, 1, 1);
-            button_more.ToolTip = "See more";
-            Grid.SetColumn(button_more, 2);
-            //SetColumn(button_more, 2);
-            Grid.SetRow(button_more, 0);
-            MainGrid.Children.Add(button_more);
-            //add experimental objects
-            StackPanel_PrimaryCommands = new StackPanel();
-            StackPanel_PrimaryCommands.Orientation = Orientation.Horizontal;
-            //StackPanel_PrimaryCommands.Width = 100;
-            Grid.SetColumn(StackPanel_PrimaryCommands, 1);
-            Grid.SetRow(StackPanel_PrimaryCommands, 0);
-            MainGrid.Children.Add(StackPanel_PrimaryCommands);
-            Grid.SetColumn(Content_Grid, 0);
-            Grid.SetRow(Content_Grid, 0);
-            MainGrid.Children.Add(Content_Grid);
-            PrimaryCommands = StackPanel_PrimaryCommands.Children;
-            MainContent = Content_Grid.Children;
-            Icon = IconHolder_More.Children;
-            change_orientation();
+                SystemTheme.ThemeChanged += new EventHandler((object obj, EventArgs args) =>
+                {
+                    cmd_color = (Color)Application.Current.Resources["SystemControlAcrylicWindowFallbackColor"];
+                    CommandBarColor = new SolidColorBrush(cmd_color);
+                    MainGrid.Background = CommandBarColor;
+                });
+                //create three columns
+                Column_Content = new ColumnDefinition();
+                Column_Content.Width = new System.Windows.GridLength(100, System.Windows.GridUnitType.Star);
+                Column_PrimaryCommands = new ColumnDefinition();
+                Column_PrimaryCommands.Width = System.Windows.GridLength.Auto;
+                Column_More = new ColumnDefinition();
+                Column_More.Width = System.Windows.GridLength.Auto;
+                MainGrid.ColumnDefinitions.Add(Column_Content);
+                MainGrid.ColumnDefinitions.Add(Column_PrimaryCommands);
+                MainGrid.ColumnDefinitions.Add(Column_More);
+                //add experimental objects
+                Style button_style = Application.Current.FindResource("ButtonRevealStyle") as Style;
+                button_more = new Button();
+                button_more.Background = Brushes.Transparent;
+                button_more.Width = 48;
+                button_more.Style = button_style;
+                button_more.Click += Button_more_Click;
+                button_more.Content = IconHolder_More;
+                button_more.BorderThickness = new Thickness(1, 1, 1, 1);
+                button_more.ToolTip = "See more";
+                Grid.SetColumn(button_more, 2);
+                //SetColumn(button_more, 2);
+                Grid.SetRow(button_more, 0);
+                MainGrid.Children.Add(button_more);
+                //add experimental objects
+                StackPanel_PrimaryCommands = new StackPanel();
+                StackPanel_PrimaryCommands.Orientation = Orientation.Horizontal;
+                //StackPanel_PrimaryCommands.Width = 100;
+                Grid.SetColumn(StackPanel_PrimaryCommands, 1);
+                Grid.SetRow(StackPanel_PrimaryCommands, 0);
+                MainGrid.Children.Add(StackPanel_PrimaryCommands);
+                Grid.SetColumn(Content_Grid, 0);
+                Grid.SetRow(Content_Grid, 0);
+                MainGrid.Children.Add(Content_Grid);
+                PrimaryCommands = StackPanel_PrimaryCommands.Children;
+                MainContent = Content_Grid.Children;
+
+               // change_orientation();
+
+                ImageBrush img_icon = new ImageBrush();
+                img_icon.ImageSource = ImageToBitmapImage(Properties.Resources.ellipsis_h);
+                Border border_icon = new Border();
+                border_icon.Width = 22;
+                border_icon.Height = 22;
+                border_icon.Background = img_icon;
+                button_more.Content = border_icon;
+            }
+
         }
+
+        private void CommandBar_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
+            {
+                change_orientation();
+            }
+
+
+        }
+
         private void change_orientation()
         {
             for (int index = 0; index < StackPanel_PrimaryCommands.Children.Count; index++)
@@ -181,6 +283,7 @@ namespace SourceChord.FluentWPF
                 }
                 catch (Exception)
                 {
+
                 }
             }
         }
@@ -332,6 +435,25 @@ namespace SourceChord.FluentWPF
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(PropertyName));
             }
+        }
+
+
+        public BitmapImage ImageToBitmapImage(System.Drawing.Image img)
+        {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            BitmapImage bi = new BitmapImage();
+            try
+            {
+                img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                bi.BeginInit();
+                bi.StreamSource = ms;
+                bi.EndInit();
+            }
+            catch (Exception)
+            {
+                bi = null;
+            }
+            return bi;
         }
     }
 }

@@ -84,6 +84,7 @@
                     <Border Background="{DynamicResource SystemAltHighColorBrush}">
                         <TextBlock Text="SystemAltHighColorBrush" Foreground="{DynamicResource SystemBaseHighColorBrush}"/>
                     </Border>
+
                 </StackPanel>
             </StackPanel>
 

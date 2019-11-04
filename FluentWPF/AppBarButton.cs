@@ -15,14 +15,15 @@ namespace SourceChord.FluentWPF
         public StackPanel MainContent;
         public TextBlock Label_Text;
         bool isExpanded = false;
-        public Grid Icon_Holder;
-        public static readonly DependencyPropertyKey IconProperty = DependencyProperty.RegisterReadOnly("Icon", typeof(UIElementCollection), typeof(AppBarButton), new PropertyMetadata());
+        public ContentPresenter Icon_Holder;
+        public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(UIElement), typeof(AppBarButton), new UIPropertyMetadata(null, OnIconPropertyChanged));
         public static readonly DependencyProperty ButtonOrientationProperty = DependencyProperty.Register("ButtonOrientation", typeof(Orientation), typeof(AppBarButton), new UIPropertyMetadata(Orientation.Vertical, OnButtonOrientationPropertyChanged));
         //public new static readonly DependencyProperty IsEnabledProperty = DependencyProperty.Register("IsEnabled", typeof(bool), typeof(AppBarButton), new PropertyMetadata(true));
         private static void OnButtonOrientationPropertyChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             AppBarButton appBarButton = (AppBarButton)source;
             appBarButton.MainContent.Orientation = (Orientation)e.NewValue;
+
             if ((Orientation)e.NewValue == Orientation.Horizontal)
             {
                 appBarButton.MainContent.VerticalAlignment = VerticalAlignment.Center;
@@ -34,7 +35,7 @@ namespace SourceChord.FluentWPF
                 appBarButton.Icon_Holder.Margin = new System.Windows.Thickness(0, 0, 0, 0);
                 if (appBarButton.Label_Text.Text == "")
                 {
-                    appBarButton.Label_Text.Visibility = Visibility.Collapsed;
+                    appBarButton.Label_Text.Visibility = Visibility.Visible;
                     appBarButton.Width = 40;
                 }
                 else
@@ -49,6 +50,15 @@ namespace SourceChord.FluentWPF
                 appBarButton.Icon_Holder.Margin = new System.Windows.Thickness(0, 7, 0, 5);
             }
         }
+
+
+        private static void OnIconPropertyChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        {
+            AppBarButton appBarButton = (AppBarButton)source;
+            appBarButton.SetValue(IconProperty, e.NewValue);
+            appBarButton.Icon_Holder.Content = appBarButton.Icon;
+        }
+
         public Orientation ButtonOrientation
         {
             get
@@ -62,11 +72,11 @@ namespace SourceChord.FluentWPF
                 //RaisePropertyChanged("ButtonOrientation");
             }
         }
-        public UIElementCollection Icon
+        public UIElement Icon
         {
             get
             {
-                return (UIElementCollection)GetValue(IconProperty.DependencyProperty);
+                return (UIElement)GetValue(IconProperty);
             }
             set
             {
@@ -139,11 +149,12 @@ namespace SourceChord.FluentWPF
             MainContent = new StackPanel();
             Padding = new System.Windows.Thickness(10, 3, 10, 3);
             MainContent.Orientation = ButtonOrientation;
-            Icon_Holder = new Grid();
+            Icon_Holder = new ContentPresenter();
             Icon_Holder.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
             Icon_Holder.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             Icon_Holder.Width = 20;
             Icon_Holder.Height = 20;
+
             Label_Text = new TextBlock();
             Label_Text.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
             Label_Text.VerticalAlignment = System.Windows.VerticalAlignment.Center;
@@ -153,7 +164,7 @@ namespace SourceChord.FluentWPF
             Label_Text.Text = Label;
             MainContent.Children.Add(Icon_Holder);
             MainContent.Children.Add(Label_Text);
-            Icon = Icon_Holder.Children;
+           // Icon = Icon_Holder;
             Content = MainContent;
             ToolTip = Label;
             //defaults for the vertical orientation
@@ -161,7 +172,7 @@ namespace SourceChord.FluentWPF
             Width = 67;
             Label_Text.Visibility = Visibility.Hidden;
             Icon_Holder.Margin = new System.Windows.Thickness(0, 7, 0, 5);
-            // process_orientation();
+            process_orientation();
         }
         public void process_orientation()
         {
@@ -184,7 +195,7 @@ namespace SourceChord.FluentWPF
             else
             {
                 //vertical
-                Icon_Holder.Margin = new System.Windows.Thickness(0, 7, 0, 5);
+                Icon_Holder.Margin = new System.Windows.Thickness(0, 10, 0, 5);
                 //fix the width
                 Width = 67;
                 //process expansion

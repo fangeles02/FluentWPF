@@ -22,6 +22,8 @@ namespace FluentWPFSample.Views
         public RevealStyles()
         {
             InitializeComponent();
+
+           
         }
     }
 }

@@ -7,7 +7,7 @@
                   xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
                   mc:Ignorable="d"
                   Title="RevealStyles"
-                  Height="320" Width="320" fw:AcrylicWindow.TintColor="White">
+                  Height="350" Width="320" fw:AcrylicWindow.TintColor="White">
     <Grid fw:PointerTracker.Enabled="True" Background="#01FFFFFF" Margin="3">
         <StackPanel>
             <Button Content="Button" HorizontalAlignment="Left" Margin="5" Width="75" Height="32"
@@ -29,10 +29,15 @@
                          fw:Extensions.PlaceholderText="Password" fw:Extensions.Header="Password"/>
         </StackPanel>
 
-        <fw:CommandBar VerticalAlignment="Bottom">
+        <fw:CommandBar VerticalAlignment="Top" CommandBarOrientation="Horizontal">
             <fw:CommandBar.PrimaryCommands>
-                <fw:AppBarButton Label="Save to disk"/>
+                <fw:AppBarButton Label="Hello">
+                    <fw:AppBarButton.Icon>
+                        <Border Background="Red"/>
+                    </fw:AppBarButton.Icon>
+                </fw:AppBarButton>
             </fw:CommandBar.PrimaryCommands>
         </fw:CommandBar>
+
     </Grid>
 </fw:AcrylicWindow>
